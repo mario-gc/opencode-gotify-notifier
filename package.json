@@ -32,7 +32,7 @@
     "ai",
     "coding-agent"
   ],
-  "author": "Mario",
+  "author": "mario-gc",
   "license": "MIT",
   "dependencies": {
     "@opencode-ai/plugin": "^1.0.0"
