@@ -1,0 +1,59 @@
+{
+  "name": "opencode-gotify-notifier",
+  "version": "0.1.0",
+  "description": "Send Gotify notifications for Opencode session events",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format .",
+    "format:fix": "biome format --write .",
+    "check": "biome check .",
+    "deploy:local": "npm run build && mkdir -p ~/.config/opencode/plugins && cp dist/index.js ~/.config/opencode/plugins/opencode-gotify-notifier.js"
+  },
+  "keywords": [
+    "opencode",
+    "plugin",
+    "gotify",
+    "notification",
+    "ai",
+    "coding-agent"
+  ],
+  "author": "Mario",
+  "license": "MIT",
+  "dependencies": {
+    "@opencode-ai/plugin": "^1.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.0.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "@opencode-ai/plugin": ">=1.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mario-gc/opencode-gotify-notifier.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mario-gc/opencode-gotify-notifier/issues"
+  },
+  "homepage": "https://github.com/mario-gc/opencode-gotify-notifier#readme"
+}
