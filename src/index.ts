@@ -356,6 +356,37 @@ export const GotifyNotify: Plugin = async ({ client, directory, worktree }) => {
         return;
       }
 
+      // Handle permission.asked event (not in v1 SDK types but emitted by Opencode v1.2.27+)
+      const eventType = (event as Record<string, unknown>).type as string;
+      if (eventType === "permission.asked") {
+        const eventProps = (event as Record<string, unknown>).properties as
+          | Record<string, unknown>
+          | undefined;
+        const sessionID = eventProps?.sessionID as string | undefined;
+        if (sessionID) {
+          const permissionType = (eventProps?.permission as string) || "unknown";
+          const patterns = (eventProps?.patterns as string[]) || [];
+
+          const state = getSessionState(sessionID);
+          const now = Date.now();
+
+          if (now - state.lastNotifiedQuestion >= 10000) {
+            state.lastNotifiedQuestion = now;
+            sessionStates.set(sessionID, state);
+
+            const sessionInfo = await getSessionInfo(sessionID);
+            const sessionDisplay = formatSessionDisplay(sessionID, sessionInfo);
+
+            const patternsStr = patterns.length > 0 ? `\n\nPatterns: ${patterns.join(", ")}` : "";
+
+            const message = `Permission required: ${permissionType}${patternsStr}\n\nSession: ${sessionDisplay}`;
+
+            await sendToGotify("\u26A0\uFE0F Permission Required", message, 7);
+          }
+        }
+        return;
+      }
+
       switch (event.type) {
         case "session.idle": {
           const sessionID = getSessionID(event as Record<string, unknown>);
@@ -470,35 +501,6 @@ export const GotifyNotify: Plugin = async ({ client, directory, worktree }) => {
               },
             });
           }
-          break;
-        }
-
-        case "permission.updated": {
-          const eventProps = event.properties;
-          const sessionID = eventProps?.sessionID;
-          if (!sessionID) break;
-
-          const permissionType = eventProps?.type || "unknown";
-          const permissionDesc = eventProps?.title || "";
-
-          const state = getSessionState(sessionID);
-          const now = Date.now();
-
-          if (now - state.lastNotifiedError < 10000) {
-            break;
-          }
-
-          state.lastNotifiedError = now;
-          sessionStates.set(sessionID, state);
-
-          const sessionInfo = await getSessionInfo(sessionID);
-          const sessionDisplay = formatSessionDisplay(sessionID, sessionInfo);
-
-          const message = permissionDesc
-            ? `Permission required: ${permissionType}\n\n${permissionDesc}\n\nSession: ${sessionDisplay}`
-            : `Permission required: ${permissionType}\n\nSession: ${sessionDisplay}`;
-
-          await sendToGotify("\u26A0\uFE0F Permission Required", message, 7);
           break;
         }
       }

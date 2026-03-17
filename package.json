@@ -1,6 +1,6 @@
 {
   "name": "opencode-gotify-notifier",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Send Gotify notifications for Opencode session events",
   "type": "module",
   "main": "dist/index.js",
@@ -35,15 +35,12 @@
   "author": "mario-gc",
   "license": "MIT",
   "dependencies": {
-    "@opencode-ai/plugin": "^1.0.0"
+    "@opencode-ai/plugin": "^1.2.27"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.0.0",
     "@types/node": "^22.0.0",
     "typescript": "^5.0.0"
-  },
-  "peerDependencies": {
-    "@opencode-ai/plugin": ">=1.0.0"
   },
   "engines": {
     "node": ">=18.0.0"
