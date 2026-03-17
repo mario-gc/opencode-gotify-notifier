@@ -33,10 +33,12 @@ npm i -g opencode-gotify-notifier
 
 Set the following environment variables:
 
-| Variable | Description | Example |
+| Variable | Description | Default |
 |----------|-------------|---------|
-| `GOTIFY_URL` | Your Gotify server URL | `https://gotify.example.com` |
-| `GOTIFY_TOKEN` | Application token from Gotify | `your-app-token` |
+| `GOTIFY_URL` | Your Gotify server URL | Required |
+| `GOTIFY_TOKEN` | Application token from Gotify | Required |
+| `GOTIFY_TLS_REJECT_UNAUTHORIZED` | Set to `false` to disable TLS verification | `true` |
+| `GOTIFY_CA_PATH` | Path to custom CA certificate (PEM format) | - |
 
 Example:
 
@@ -45,9 +47,33 @@ export GOTIFY_URL="https://gotify.example.com"
 export GOTIFY_TOKEN="your-application-token"
 ```
 
-### Security Note
+## Security
 
-TLS certificate verification is disabled to support self-signed certificates. This is safe for LAN/internal Gotify servers.
+**TLS verification is enabled by default** for secure connections.
+
+### Self-Signed Certificates
+
+If your Gotify server uses a self-signed certificate, you have options:
+
+**Option 1: Use a custom CA certificate (recommended)**
+
+```bash
+export GOTIFY_CA_PATH=/path/to/your-ca.pem
+```
+
+**Option 2: Disable TLS verification (not recommended for production)**
+
+```bash
+export GOTIFY_TLS_REJECT_UNAUTHORIZED=false
+```
+
+**Option 3: Use Node.js environment variable**
+
+```bash
+export NODE_TLS_REJECT_UNAUTHORIZED=0
+```
+
+> ⚠️ Disabling TLS verification makes your connection vulnerable to man-in-the-middle attacks. Only use this for development or trusted internal networks.
 
 ## Notification Types
 

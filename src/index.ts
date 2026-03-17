@@ -7,9 +7,11 @@
  * - Environment variables: GOTIFY_URL (e.g., https://gotify.example.com), GOTIFY_TOKEN
  * - Works in TUI, CLI, and Web modes
  *
- * Security Note:
- * - TLS verification is disabled for self-signed certificates
- * - Safe for LAN/internal Gotify servers
+ * TLS Configuration:
+ * - TLS verification is enabled by default for secure connections
+ * - Set GOTIFY_TLS_REJECT_UNAUTHORIZED=false to disable (not recommended)
+ * - Set GOTIFY_CA_PATH=/path/to/ca.pem for custom CA certificates
+ * - Respects NODE_TLS_REJECT_UNAUTHORIZED as fallback
  */
 
 import type { Plugin } from "@opencode-ai/plugin";
@@ -59,6 +61,36 @@ setInterval(
 );
 
 export const GotifyNotify: Plugin = async ({ client, directory, worktree }) => {
+  interface TLSOptions {
+    rejectUnauthorized: boolean;
+    ca?: Blob;
+  }
+
+  const getTlsOptions = (): TLSOptions => {
+    const gotifyReject = process.env.GOTIFY_TLS_REJECT_UNAUTHORIZED;
+    const nodeReject = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+
+    let rejectUnauthorized: boolean;
+    if (gotifyReject !== undefined) {
+      rejectUnauthorized = gotifyReject !== "false" && gotifyReject !== "0";
+    } else if (nodeReject !== undefined) {
+      rejectUnauthorized = nodeReject !== "false" && nodeReject !== "0";
+    } else {
+      rejectUnauthorized = true;
+    }
+
+    const caPath = process.env.GOTIFY_CA_PATH;
+    const tls: TLSOptions = { rejectUnauthorized };
+
+    if (caPath) {
+      tls.ca = Bun.file(caPath);
+    }
+
+    return tls;
+  };
+
+  const tlsOptions = getTlsOptions();
+
   await client.app.log({
     body: {
       service: "gotify-notify",
@@ -70,6 +102,35 @@ export const GotifyNotify: Plugin = async ({ client, directory, worktree }) => {
       },
     },
   });
+
+  // Log TLS configuration
+  if (!tlsOptions.rejectUnauthorized) {
+    await client.app.log({
+      body: {
+        service: "gotify-notify",
+        level: "warn",
+        message: "[SECURITY] TLS verification DISABLED - connection vulnerable to MITM attacks",
+      },
+    });
+    if (tlsOptions.ca) {
+      await client.app.log({
+        body: {
+          service: "gotify-notify",
+          level: "warn",
+          message: "[SECURITY] Custom CA provided but will be IGNORED (verification disabled)",
+        },
+      });
+    }
+  } else {
+    await client.app.log({
+      body: {
+        service: "gotify-notify",
+        level: "info",
+        message: "TLS verification enabled (secure mode)",
+        extra: tlsOptions.ca ? { customCA: process.env.GOTIFY_CA_PATH } : undefined,
+      },
+    });
+  }
 
   const getConfig = () => {
     const GOTIFY_URL = process.env.GOTIFY_URL;
@@ -113,10 +174,8 @@ export const GotifyNotify: Plugin = async ({ client, directory, worktree }) => {
           message: message,
           priority: priority,
         }),
-        tls: {
-          rejectUnauthorized: false,
-        },
-      } as RequestInit & { tls: { rejectUnauthorized: boolean } });
+        tls: tlsOptions,
+      } as RequestInit & { tls: TLSOptions });
 
       if (!response.ok) {
         const errorText = await response.text();
