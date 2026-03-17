@@ -1,6 +1,6 @@
 {
   "name": "opencode-gotify-notifier",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Send Gotify notifications for Opencode session events",
   "type": "module",
   "main": "dist/index.js",
@@ -39,6 +39,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.0.0",
+    "@types/bun": "^1.3.10",
     "@types/node": "^22.0.0",
     "typescript": "^5.0.0"
   },
