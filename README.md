@@ -12,8 +12,6 @@ Send Gotify notifications for Opencode session events.
 
 ## Installation
 
-### Via Opencode config (recommended)
-
 Add to your `~/.config/opencode/opencode.json`:
 
 ```json
@@ -21,12 +19,6 @@ Add to your `~/.config/opencode/opencode.json`:
   "$schema": "https://opencode.ai/config.json",
   "plugin": ["opencode-gotify-notifier"]
 }
-```
-
-### Via npm
-
-```bash
-npm i -g opencode-gotify-notifier
 ```
 
 ## Configuration
