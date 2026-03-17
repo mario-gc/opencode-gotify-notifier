@@ -1,6 +1,6 @@
 {
   "name": "opencode-gotify-notifier",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Send Gotify notifications for Opencode session events",
   "type": "module",
   "main": "dist/index.js",
